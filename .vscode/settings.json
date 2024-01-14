@@ -1,0 +1,11 @@
+{
+	"cmake.sourceDirectory": "${workspaceFolder}",
+	"cmake.buildDirectory": "${workspaceFolder}/build/build",
+	"C_Cpp.default.includePath": [
+		"${workspaceFolder}/includes/",
+		"${workspaceFolder}/extern/glm/",
+		"${workspaceFolder}/src/**/public_include",
+	],
+	"cmake.automaticReconfigure": false,
+	"cmake.configureOnEdit": true
+}
