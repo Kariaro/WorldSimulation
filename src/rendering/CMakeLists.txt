@@ -8,5 +8,7 @@ target_include_directories(rendering
 target_link_libraries(rendering
 	PUBLIC glfw3
 	PUBLIC glad
+	PUBLIC stb_image
 	PUBLIC opengl32
+	PUBLIC utility_math
 	)

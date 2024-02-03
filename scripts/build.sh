@@ -27,6 +27,7 @@ else
 	cmake . -B build/build \
 		-G "MinGW Makefiles" \
 		-DCMAKE_MAKE_PROGRAM="D:/CppCompilers/MinGW/mingw64/bin/mingw32-make.exe" \
+		-DCMAKE_RC_COMPILER="D:/CppCompilers/MinGW/mingw64/bin/windres.exe" \
 		-DCMAKE_C_COMPILER="D:/CppCompilers/MinGW/mingw64/bin/gcc.exe" \
 		-DCMAKE_CXX_COMPILER="D:/CppCompilers/MinGW/mingw64/bin/g++.exe"
 fi
@@ -36,4 +37,5 @@ fi
 cmake --build build/build \
       --config Release \
 	  --target all \
-	  -j 18
+	  -j 18 && \
+ctest --test-dir build/build --output-on-failure
