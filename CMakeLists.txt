@@ -18,51 +18,63 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED On)
-set(CMAKE_CXX_EXTENSIONS Off)
-set(BUILD_SHARED_LIBS Off)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_EXE_LINKER_FLAGS "-static -static-libstdc++ -std=c++20")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 add_definitions(-DGLM_FORCE_SILENT_WARNINGS)
 
-set(CMAKE_EXE_LINKER_FLAGS "-static -static-libstdc++ -std=c++20")
-set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+# set(CMAKE_EXE_LINKER_FLAGS "-static -static-libstdc++ -std=c++20")
 
 # Find packages
 find_package(GLFW3 REQUIRED)
 message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 
-SET(ASSIMP_BUILD_TESTS OFF CACHE BOOL "")
-SET(ASSIMP_BUILD_ASSIMP_VIEW OFF CACHE BOOL "")
-SET(ASSIMP_NO_EXPORT ON CACHE BOOL "")
- 
+# Link directory
+link_directories(lib)
+
+# Create imgui library
+set(IMGUI_PATH "extern/imgui")
+file(GLOB IMGUI_SOURCES "${IMGUI_PATH}/*.cpp")
+set(IMGUI_BACKENDS_SOURCES
+	"extern/imgui/backends/imgui_impl_glfw.cpp"
+	"extern/imgui/backends/imgui_impl_opengl2.cpp"
+	"extern/imgui/backends/imgui_impl_opengl3.cpp")
+add_library(imgui STATIC ${IMGUI_SOURCES} ${IMGUI_BACKENDS_SOURCES})
+target_link_libraries(imgui PRIVATE glfw3)
+target_include_directories(imgui
+	PUBLIC ${IMGUI_PATH}
+	PUBLIC ${IMGUI_PATH}/backends)
+
 # Add third party sources
 add_subdirectory(extern/glm)
 
 add_subdirectory(includes/glad)
 add_subdirectory(includes/stb_image)
 
-# set(LIBS glfw3 opengl32 assimp freetype irrKlang)
-
-link_directories(lib)
 include_directories(includes)
 
 # Compile options
-add_compile_options(
-	-lopengl32
+add_link_options(
+#	-lopengl32
 	-static
-#	-static-libgcc
-#	-static-libstdc++
+	-std=c++20
+)
+add_compile_options(
 	-O3
 # Error logging
 	-Wall
 	-Wextra
 	-Wpedantic
 	-Werror
-# Removed
+# Removed (TODO Try make the build as clean as possible and do not randomly remove warnings)
 	-Wno-unused-parameter
 	-Wno-unused-private-field
-# Temporary
+	-Wno-unused-command-line-argument
+	-Wno-language-extension-token
 	-Wno-missing-field-initializers
 	-Wno-missing-braces
 )

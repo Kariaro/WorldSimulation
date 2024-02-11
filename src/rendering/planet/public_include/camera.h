@@ -24,8 +24,7 @@ struct Camera
 {
     // Position is stored as double to prevent position glitches in the shader
     glm::dvec3 position{};
-    glm::dvec3 rotation{}; // (Roll, Pitch, Yaw)
-    glm::dquat rotationTest{};
+    glm::dquat rotation{};
 
     // Fov and 
     double cameraFov{90};
@@ -42,21 +41,12 @@ struct Camera
                 0, 0,-1,
                -1, 0, 0,
                 0, 1, 0
-            )); 
-        // glm::lookAt(glm::dvec3(0, 0, 0), glm::dvec3(-1, 0, 0), glm::dvec3(0, 0, 1));
+            ));
     }
 
     [[nodiscard]] glm::mat4 getCameraMatrix()
     {
-        return glm::mat4_cast(rotationTest);
-        // return glm::mat4(wgs84::rpy(rotation.x, rotation.y, rotation.z));
-        /*
-        return glm::mat4_cast(
-            glm::angleAxis(float(glm::radians(-rotation.x)), glm::vec3(1, 0, 0)) * // Roll
-            glm::angleAxis(float(glm::radians(-rotation.y)), glm::vec3(0, 1, 0)) * // Pitch
-            glm::angleAxis(float(glm::radians(-rotation.z)), glm::vec3(0, 0, 1))   // Yaw
-        );
-        */
+        return glm::mat4_cast(rotation);
     }
 
     [[nodiscard]] glm::mat4 getViewMatrix(double a_width, double a_height)

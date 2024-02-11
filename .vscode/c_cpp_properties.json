@@ -9,7 +9,9 @@
                 "${workspaceFolder}/includes/glad",
                 "${workspaceFolder}/includes/stb_image",
                 "${workspaceFolder}/extern/glm",
-                "${workspaceFolder}/extern/googletest/googletest/include"
+                "${workspaceFolder}/extern/googletest/googletest/include",
+                "${workspaceFolder}/extern/imgui",
+                "${workspaceFolder}/extern/imgui/backends",
             ],
             "defines": [
                 "_DEBUG",

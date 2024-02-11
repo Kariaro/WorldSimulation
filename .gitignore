@@ -1,4 +1,5 @@
 build/
 tmp_*/
-test/
+/test
 assets/
+Testing/

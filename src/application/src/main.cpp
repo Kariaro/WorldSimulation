@@ -7,11 +7,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "planet.h"
 #include "registry.hpp"
 
-constexpr std::string_view c_green = "\033[32m";
-constexpr std::string_view c_reset = "\033[0m";
+#include "worldrender.h"
 
 struct transform
 {
@@ -25,8 +23,6 @@ struct b_device {};
 
 
 int main(int argc, char** argv) {
-	std::cout << c_green << " -------- World Simulation -------- " << c_reset << std::endl;
-	
 	ecs::registry<
 		ecs::component<transform, 1000>
 		, ecs::component<a_device, 2000>
@@ -66,7 +62,14 @@ int main(int argc, char** argv) {
 
 	std::cout << std::endl;
 
-	render::render_test();
+	render::WorldRenderer renderer;
+	if(!renderer.init())
+	{
+		std::printf("Failed to init world renderer!\n");
+		return EXIT_FAILURE;
+	}
+
+	renderer.run();
 
 	auto& components = registry.getComponentsOfType<transform>();
 	(void) components;
@@ -80,9 +83,6 @@ int main(int argc, char** argv) {
 	ecs::entity entity = registry.createEntity();
 	a_device*  device = registry.addComponent<a_device>(entity);
 	(void) device;
-
-
-	std::cout << c_green << " -------- End -------- " << c_reset << std::endl;
 
 	return 0;
 }

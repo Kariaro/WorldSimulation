@@ -22,7 +22,6 @@ namespace render::plane
 
 struct Plane
 {
-    // Position xyz in 3d
     glm::dvec3 position{};
     glm::dquat rotation{glm::identity<glm::dquat>()};
 
@@ -53,6 +52,43 @@ struct Plane
     {
         auto lla = wgs84::ecef2lla_deg(position);
         return lla.y;
+    }
+
+    [[nodiscard]] glm::dvec3 getLLA() const
+    {
+        return wgs84::ecef2lla_deg(position);
+    }
+
+    /// Get local tangent plane (roll pitch yaw)
+    [[nodiscard]] glm::dvec3 getLTP_RPY_rad() const
+    {
+        // rotation = nwu * rpy
+        // localRotation = (nwu ^ -1) * nwu * rpy = rpy
+        const auto nwu = getLocalTangentPlane();
+        const auto localRotation = glm::inverse(glm::quat_cast(nwu)) * rotation;
+
+        // GLM assumes XYZ we use YZX therefore, we need to move these methods arround
+        double roll = glm::pitch(localRotation);
+        double pitch = glm::yaw(localRotation);
+        double yaw = glm::roll(localRotation);
+
+        // TODO: Is this needed?
+        if(!std::isfinite(roll)) roll = 0;
+        if(!std::isfinite(pitch)) pitch = 0;
+        if(!std::isfinite(yaw)) yaw = 0;
+
+        return { roll, pitch, yaw };
+    }
+
+    /// Get local tangent plane (roll pitch yaw)
+    [[nodiscard]] glm::dvec3 getLTP_RPY_deg()
+    {
+        const auto rpy = getLTP_RPY_rad();
+        return {
+            rpy.x * wgs84::c_rad2deg,
+            rpy.y * wgs84::c_rad2deg,
+            rpy.z * wgs84::c_rad2deg
+        };
     }
 };
 

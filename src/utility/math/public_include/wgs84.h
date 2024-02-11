@@ -50,8 +50,7 @@ constexpr glm::dvec3 lla2ecef_deg(
 	);
 }
 
-
-
+// TODO: Use olson1998 (ch) instead
 constexpr glm::dvec3 ecef2lla_rad(const glm::dvec3& a_ecef)
 {
 	const double x = a_ecef.x;

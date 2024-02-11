@@ -12,7 +12,7 @@ export PATH="D:/CppCompilers/LLVM/bin;${PATH}"
 export LD_LIBRARY_PATH="D:/CppCompilers/MinGW/mingw64/bin:${LD_LIBRARY_PATH}"
 
 if [ "$1" == "--clean" ]; then
-	rm -rf build/build
+	rm -rf build/
 fi
 
 USE_CLANG="false"
@@ -35,7 +35,7 @@ fi
 
 #	  --config RelWithDebInfo
 cmake --build build/build \
-      --config Release \
+      --config RelWithDebInfo \
 	  --target all \
 	  -j 18 && \
 ctest --test-dir build/build --output-on-failure

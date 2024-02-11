@@ -1,6 +1,6 @@
 
-#ifndef RENDERING_SHADER_H
-#define RENDERING_SHADER_H
+#ifndef RENDERING_SHADER
+#define RENDERING_SHADER
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,7 +11,7 @@
 namespace render::shader
 {
 
-const char* getShaderTypeName(unsigned int a_shaderType)
+static const char* getShaderTypeName(unsigned int a_shaderType)
 {
     switch(a_shaderType)
     {
@@ -22,7 +22,7 @@ const char* getShaderTypeName(unsigned int a_shaderType)
     return "unknown";
 }
 
-int compileShaderCode(
+static int compileShaderCode(
     const char* a_shaderCode,
     const int a_shaderType)
 {
@@ -57,7 +57,7 @@ int compileShaderCode(
     return shaderId;
 }
 
-int compileShader(
+static int compileShader(
     const char* a_vertexShader,
     const char* a_fragmentShader)
 {
@@ -120,4 +120,4 @@ int compileShader(
 
 } // render::shader
 
-#endif  // RENDERING_SHADER_H
+#endif  // RENDERING_SHADER

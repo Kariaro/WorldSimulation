@@ -1,6 +1,7 @@
 add_library(rendering)
 target_sources(rendering
-	PUBLIC planet/src/planet.cpp
+	PUBLIC planet/src/worldrender.cpp
+	PUBLIC planet/src/quadsphere.cpp
 	)
 target_include_directories(rendering
     PUBLIC planet/public_include
@@ -11,4 +12,5 @@ target_link_libraries(rendering
 	PUBLIC stb_image
 	PUBLIC opengl32
 	PUBLIC utility_math
+	PUBLIC imgui
 	)
