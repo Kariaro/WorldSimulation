@@ -11,6 +11,6 @@ target_link_libraries(rendering
 	PUBLIC glad
 	PUBLIC stb_image
 	PUBLIC opengl32
-	PUBLIC utility_math
+	PUBLIC geodecy
 	PUBLIC imgui
 	)

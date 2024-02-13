@@ -1,6 +1,6 @@
 
-#ifndef UTILITY_MATH_WGS84
-#define UTILITY_MATH_WGS84
+#ifndef GEODECY_WGS84
+#define GEODECY_WGS84
 
 #include <glm/vec3.hpp>
 #include <glm/mat3x3.hpp>
@@ -8,7 +8,7 @@
 
 #include <cmath>
 
-namespace wgs84
+namespace geodecy::wgs84
 {
 
 constexpr const double c_PI = 3.14159265358979323846264338327950288;
@@ -136,7 +136,6 @@ constexpr glm::dvec3 ecef2lla_deg(const glm::dvec3& a_ecef)
 
 // Calculate the viewing direction
 // I call this the North West Up
-// TODO: Verify function
 constexpr glm::dmat3 lla2nwu_rad(
 	double a_latitude_rad,
 	double a_longitude_rad)
@@ -145,15 +144,11 @@ constexpr glm::dmat3 lla2nwu_rad(
 	const double s_lat = std::sin(a_latitude_rad);
 	const double c_lon = std::cos(a_longitude_rad);
 	const double s_lon = std::sin(a_longitude_rad);
-	// return glm::dmat3(
-	// 	-s_lat * c_lon, -s_lat * s_lon,  c_lat,
-	// 	-s_lon        ,  c_lon        ,  0.0,
-	// 	-c_lat * c_lon, -c_lat * s_lon, -s_lat
-	// );
+
 	return glm::dmat3(
-		-s_lat * c_lon, -s_lat * s_lon,  c_lat,
-		 s_lon        , -c_lon        , -0.0,
-		 c_lat * c_lon,  c_lat * s_lon,  s_lat
+		-s_lat * c_lon, -s_lat * s_lon, c_lat,
+		 s_lon        , -c_lon        , 0.0,
+		 c_lat * c_lon,  c_lat * s_lon, s_lat
 	);
 }
 
@@ -191,19 +186,54 @@ glm::dmat3 rpy(
 	);
 }
 
-/// Calculate the current yaw, pitch and roll
-/*
-constexpr glm::dvec3 quat2rpy(const glm::dvec3& )
+} // geodecy::wgs84
+
+
+
+// TODO: Use this in the future?
+#include "spheroid.hpp"
+namespace geodecy {
+
+using wgs84_test = spheroid<double, 6378137.0, 6356752.314245, glm::dvec3, glm::dmat3x3>;
+
+template <>
+constexpr double wgs84_test::get_x(const glm::dvec3& a_xyz)
 {
-	auto lla_rad = ecef2lla_rad(a_ecef);
-	return {
-		lla_rad.x * c_rad2deg,
-		lla_rad.y * c_rad2deg,
-		lla_rad.z // altitude
-	};
+	return a_xyz.x;
 }
-*/
 
-} // wgs84
+template <>
+constexpr double wgs84_test::get_y(const glm::dvec3& a_xyz)
+{
+	return a_xyz.y;
+}
 
-#endif  // UTILITY_MATH_WGS84
+template <>
+constexpr double wgs84_test::get_z(const glm::dvec3& a_xyz)
+{
+	return a_xyz.z;
+}
+
+template <>
+constexpr glm::dvec3 wgs84_test::to_vec(
+	Type a_x, Type a_y, Type a_z)
+{
+	return glm::dvec3(a_x, a_y, a_z);
+}
+
+template <>
+constexpr glm::dmat3 wgs84_test::to_mat(
+	Type a_x0, Type a_y0, Type a_z0,
+	Type a_x1, Type a_y1, Type a_z1,
+	Type a_x2, Type a_y2, Type a_z2)
+{
+	return glm::dmat3(
+		a_x0, a_y0, a_z0,
+		a_x1, a_y1, a_z1,
+		a_x2, a_y2, a_z2);
+}
+
+
+} // geodecy
+
+#endif  // GEODECY_WGS84

@@ -15,6 +15,10 @@
 
 #include "shader.h"
 
+#include "wgs84.hpp"
+
+using namespace geodecy;
+
 namespace render::geometry
 {
 

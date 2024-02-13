@@ -14,9 +14,6 @@
 #include <vector>
 #include <cmath>
 
-#include "wgs84.h"
-
-
 namespace render::camera
 {
 

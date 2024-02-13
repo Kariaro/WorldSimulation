@@ -6,7 +6,9 @@
 
 #include <random>
 
-#include "wgs84.h"
+#include "wgs84.hpp"
+
+using namespace geodecy;
 
 /// Returns the X, Y and Z axis of the matrix
 std::tuple<glm::dvec3, glm::dvec3, glm::dvec3> getAxis(const glm::dmat3& a_matrix)
@@ -181,6 +183,35 @@ TEST(wgs84_test, ecef2lla)
 
 		// lla.x = std::fmod(lla.x + 720, 180.0);
 		// lla.y = std::fmod(lla.y + 720, 360.0);
+
+		EXPECT_NEAR(lat_deg, lla.x, 0.001);
+		EXPECT_NEAR(lon_deg, lla.y, 0.001);
+		EXPECT_NEAR(alt_met, lla.z, 0.001);
+
+		std::printf("==========================================\n");
+		std::printf("original lat: %.8f, lon: %.8f, alt: %.8f\n", lat_deg, lon_deg, alt_met);
+		std::printf("back     lat: %.8f, lon: %.8f, alt: %.8f\n", lla.x, lla.y, lla.z);
+		std::printf("diff     lat: %.24f, lon: %.24f, alt: %.24f\n", lla.x - lat_deg, lla.y - lon_deg, lla.z - alt_met);
+	}
+}
+
+TEST(wgs84_test, ecef2lla_2)
+{
+	std::minstd_rand random{};
+	std::cout << random.min() << "," << random.max() << std::endl;
+	
+	for(int i = 0; i < 100; i++)
+	{
+		double v0 = (random() - random.min()) / static_cast<double>(random.max() - random.min());
+		double v1 = (random() - random.min()) / static_cast<double>(random.max() - random.min());
+		double v2 = (random() - random.min()) / static_cast<double>(random.max() - random.min());
+
+		double lat_deg = v0 * 180.0 -  90.0;
+		double lon_deg = v1 * 360.0 - 180.0;
+		double alt_met = v2 * 100'000.0;
+
+		auto ecef = wgs84_test::deg::lla2xyz(lat_deg, lon_deg, alt_met);
+		auto lla = wgs84_test::deg::xyz2lla(ecef);
 
 		EXPECT_NEAR(lat_deg, lla.x, 0.001);
 		EXPECT_NEAR(lon_deg, lla.y, 0.001);

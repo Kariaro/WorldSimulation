@@ -3,7 +3,7 @@ add_executable(${TEST_NAME}
 	wgs84_test.cpp
 )
 target_link_libraries(${TEST_NAME}
-	utility_math
+	geodecy
 	gtest
 	gtest_main)
 set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${TEST_RUNTIME_OUTPUT_DIRECTORY}")

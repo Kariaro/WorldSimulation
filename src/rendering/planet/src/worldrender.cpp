@@ -12,7 +12,7 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <stb_image.h>
 
-#include "wgs84.h"
+#include "wgs84.hpp"
 #include "geometry.h"
 
 #include "plane.h"
@@ -22,6 +22,9 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+
+
+using namespace geodecy;
 
 namespace render
 {

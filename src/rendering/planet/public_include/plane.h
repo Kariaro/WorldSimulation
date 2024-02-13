@@ -14,8 +14,9 @@
 #include <vector>
 #include <cmath>
 
-#include "wgs84.h"
+#include "wgs84.hpp"
 
+using namespace geodecy;
 
 namespace render::plane
 {
