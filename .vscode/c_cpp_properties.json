@@ -12,6 +12,7 @@
                 "${workspaceFolder}/extern/googletest/googletest/include",
                 "${workspaceFolder}/extern/imgui",
                 "${workspaceFolder}/extern/imgui/backends",
+                "${workspaceFolder}/extern/pugixml/src",
             ],
             "defines": [
                 "_DEBUG",

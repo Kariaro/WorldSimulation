@@ -15,23 +15,23 @@ namespace render
 class WorldRenderer
 {
 public:
-    explicit WorldRenderer();
+	explicit WorldRenderer();
 
-    /// Init the renderer
-    /// @return false if the renderer failed to start
-    bool init();
+	/// Init the renderer
+	/// @return false if the renderer failed to start
+	bool init();
 
-    void run();
+	void run();
 private:
-    void renderFrame();
-    void renderGui();
+	void renderFrame();
+	void renderGui();
 
-    double m_targetFps = 60;
+	double m_targetFps = 60;
 
-    /// Window object
-    GLFWwindow* m_window;
-    int m_windowWidth;
-    int m_windowHeight;
+	/// Window object
+	GLFWwindow* m_window;
+	int m_windowWidth;
+	int m_windowHeight;
 };
 
 } // render

@@ -36,52 +36,52 @@ WorldRenderer::WorldRenderer()
 
 bool WorldRenderer::init()
 {
-    if(!glfwInit())
-    {
-        std::printf("Failed to init GLFW\n");
-        return false;
-    }
+	if(!glfwInit())
+	{
+		std::printf("Failed to init GLFW\n");
+		return false;
+	}
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	m_windowWidth = 800;
 	m_windowHeight = 600;
-    m_window = glfwCreateWindow(m_windowWidth, m_windowHeight, "World Simulation", NULL, NULL);
-    if(m_window == NULL)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return false;
-    }
+	m_window = glfwCreateWindow(m_windowWidth, m_windowHeight, "World Simulation", NULL, NULL);
+	if(m_window == NULL)
+	{
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return false;
+	}
 
 	glfwSetWindowUserPointer(m_window, this);
-    glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
-    {
+	glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
+	{
 		WorldRenderer* renderer = static_cast<WorldRenderer*>(glfwGetWindowUserPointer(window));
 
-        glViewport(0, 0, width, height);
+		glViewport(0, 0, width, height);
 		renderer->m_windowWidth = width;
 		renderer->m_windowHeight = height;
-    });
+	});
 
-    glfwMakeContextCurrent(m_window);
-    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return false;
-    }
+	glfwMakeContextCurrent(m_window);
+	if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return false;
+	}
 
 	// Setup ImGui
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.IniFilename = nullptr;
 	io.LogFilename = nullptr;
-    ImGui::StyleColorsDark();
+	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(m_window, true);
-    ImGui_ImplOpenGL3_Init("#version 130");
+	ImGui_ImplOpenGL3_Init("#version 130");
 
 	return true;
 }
@@ -131,7 +131,7 @@ void WorldRenderer::renderFrame()
 	int pitchDir = 0; (void) pitchDir;
 	int zz = 0;
 	int xx = 0;
-	int yy = 0;
+	int yy = 0; (void) yy;
 	{
 		constexpr double rotationSpeed = 2;
 		if(glfwGetKey(m_window, GLFW_KEY_R) == GLFW_PRESS) renderCamera.rotation.y -= rotationSpeed;
@@ -169,10 +169,10 @@ void WorldRenderer::renderFrame()
 		glm::dvec3 gravityUp;
 		{
 			auto nwu = testPlane.getLocalTangentPlane();
-			auto lla = wgs84::ecef2lla_deg(newPosition);
+			auto lla = wgs84::deg::xyz2lla(newPosition);
 
 			gravityUp = nwu * glm::dvec3(0, 0, 1);
-			newPosition = wgs84::lla2ecef_deg(lla.x, lla.y, flyHeight);
+			newPosition = wgs84::deg::lla2xyz(lla.x, lla.y, flyHeight);
 		}
 
 		testPlane.position = newPosition;
@@ -186,8 +186,8 @@ void WorldRenderer::renderFrame()
 
 		// Apply curvature fix
 		{
-			auto n_lla = wgs84::ecef2lla_deg(newPosition);
-			auto n_nwu = wgs84::lla2nwu_deg(n_lla.x, n_lla.y);
+			auto n_lla = wgs84::deg::xyz2lla(newPosition);
+			auto n_nwu = wgs84::deg::lla2nwu(n_lla.x, n_lla.y);
 			auto n_up = n_nwu * glm::dvec3(0, 0, 1);
 
 			// Rotation needed to fix rotation
@@ -202,13 +202,13 @@ void WorldRenderer::renderFrame()
 		{
 			const auto nwu = testPlane.getLocalTangentPlane();
 			const auto rpy = testPlane.getLTP_RPY_rad();
-			testPlane.rotation = nwu * wgs84::rpy_rad(rpy.x, rpy.y, rpy.z);
+			testPlane.rotation = nwu * geodecy::rpy_rad(rpy.x, rpy.y, rpy.z);
 		}
 
 		if(cameraMode == 0) // Top down
 		{
-			auto lla = wgs84::ecef2lla_deg(testPlane.position);
-			renderCamera.position = wgs84::lla2ecef_deg(lla.x, lla.y, lla.z + 3'000'000);
+			auto lla = wgs84::deg::xyz2lla(testPlane.position);
+			renderCamera.position = wgs84::deg::lla2xyz(lla.x, lla.y, lla.z + 3'000'000);
 			renderCamera.rotation = testPlane.getLocalTangentPlane()
 				* glm::dmat3(glm::angleAxis(glm::radians(90.0), glm::dvec3(0, 1, 0)));
 		}
@@ -337,85 +337,85 @@ void WorldRenderer::renderGui()
 
 void WorldRenderer::run()
 {
-    std::printf("OpenGL version: %s\n", glGetString(GL_VERSION));
+	std::printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 
-    frameData.quadsphere = quadsphere::generateQuadsphereData(4);
-    frameData.geometry_test_data = geometry::test();
+	frameData.quadsphere = quadsphere::generateQuadsphereData(4);
+	frameData.geometry_test_data = geometry::test();
 
-    frameData.earthTextureId = image::loadImage("assets/earth_texture_10k.jpg");
-    frameData.earthDepthmapId = image::loadImage("assets/earth_depthmap_10k.jpg");
-    std::printf("Read texture %u\n", frameData.earthTextureId);
-    std::printf("Read texture %u\n", frameData.earthDepthmapId);
+	frameData.earthTextureId = image::loadImage("assets/earth_texture_10k.jpg");
+	frameData.earthDepthmapId = image::loadImage("assets/earth_depthmap_10k.jpg");
+	std::printf("Read texture %u\n", frameData.earthTextureId);
+	std::printf("Read texture %u\n", frameData.earthDepthmapId);
 
-    glUseProgram(frameData.quadsphere.shaderProgramId);
-    glUniform1i(glGetUniformLocation(frameData.quadsphere.shaderProgramId, "earthTexture"), 0);
-    glUniform1i(glGetUniformLocation(frameData.quadsphere.shaderProgramId, "earthDepthmap"), 1);
-    glUseProgram(0);
+	glUseProgram(frameData.quadsphere.shaderProgramId);
+	glUniform1i(glGetUniformLocation(frameData.quadsphere.shaderProgramId, "earthTexture"), 0);
+	glUniform1i(glGetUniformLocation(frameData.quadsphere.shaderProgramId, "earthDepthmap"), 1);
+	glUseProgram(0);
 
-    frameData.renderCamera.position = wgs84::lla2ecef_deg(0, 0, 3'000'000);
-    frameData.renderCamera.rotation = glm::quat_cast(wgs84::lla2nwu_deg(90, 0));
+	frameData.renderCamera.position = wgs84::deg::lla2xyz(0, 0, 3'000'000);
+	frameData.renderCamera.rotation = glm::quat_cast(wgs84::deg::lla2nwu(90, 0));
 
-    frameData.testPlane.position = wgs84::lla2ecef_deg(0, 0, 1000);
-    frameData.testPlane.rotation = glm::quat_cast(wgs84::lla2nwu_deg(0, 0))
-        * glm::angleAxis(glm::radians(-90.0), glm::dvec3(0, 0, 1))
+	frameData.testPlane.position = wgs84::deg::lla2xyz(0, 0, 1000);
+	frameData.testPlane.rotation = glm::quat_cast(wgs84::deg::lla2nwu(0, 0))
+		* glm::angleAxis(glm::radians(-90.0), glm::dvec3(0, 0, 1))
 		* glm::angleAxis(glm::radians(-45.0), glm::dvec3(0, 1, 0));
 
-    // {
-    //     double lat = 27.986065;
-    //     double lon = 86.922623;
-    //     frameData.testPlane.position = wgs84::lla2ecef_deg(lat, lon, 1000);
-    //     frameData.testPlane.rotation = glm::quat_cast(wgs84::lla2nwu_deg(lat, lon));
-    // }
+	// {
+	//	 double lat = 27.986065;
+	//	 double lon = 86.922623;
+	//	 frameData.testPlane.position = wgs84::deg::lla2xyz(lat, lon, 1000);
+	//	 frameData.testPlane.rotation = glm::quat_cast(wgs84::deg::lla2nwu(lat, lon));
+	// }
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 
-    using namespace std::chrono;
-    int frames = 0;
-    auto fpsDuration = nanoseconds(static_cast<uint64_t>(1'000'000'000 / m_targetFps));
-    auto nextSecond = high_resolution_clock::now();
-    auto nextFrame = high_resolution_clock::now();
-    while(!glfwWindowShouldClose(m_window))
-    {
+	using namespace std::chrono;
+	int frames = 0;
+	auto fpsDuration = nanoseconds(static_cast<uint64_t>(1'000'000'000 / m_targetFps));
+	auto nextSecond = high_resolution_clock::now();
+	auto nextFrame = high_resolution_clock::now();
+	while(!glfwWindowShouldClose(m_window))
+	{
 		// Poll window events
-        glfwPollEvents();
+		glfwPollEvents();
 
-        std::this_thread::sleep_until(nextFrame);
-        nextFrame += fpsDuration;
+		std::this_thread::sleep_until(nextFrame);
+		nextFrame += fpsDuration;
 
-        frames ++;
-        if(high_resolution_clock::now() > nextSecond)
-        {
-            std::printf("Frames %d\n", frames);
-            frames = 0;
-            nextSecond += seconds(1);
-        }
+		frames ++;
+		if(high_resolution_clock::now() > nextSecond)
+		{
+			std::printf("Frames %d\n", frames);
+			frames = 0;
+			nextSecond += seconds(1);
+		}
 
 		// Render frame
 		renderFrame();
 
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+		// Start the Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
 		renderGui();
 
 		// Render ImGui
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(m_window);
-    }
+	}
 
 	// Shutdown ImGui
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	// Shutdown glfw
 	glfwDestroyWindow(m_window);
-    glfwTerminate();
+	glfwTerminate();
 }
 
 } // render

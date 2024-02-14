@@ -33,6 +33,8 @@ add_definitions(-DGLM_FORCE_SILENT_WARNINGS)
 find_package(GLFW3 REQUIRED)
 message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 
+add_subdirectory(extern/gdal)
+
 # Link directory
 link_directories(lib)
 
@@ -51,11 +53,15 @@ target_include_directories(imgui
 
 # Add third party sources
 add_subdirectory(extern/glm)
+add_subdirectory(extern/pugixml)
 
 add_subdirectory(includes/glad)
 add_subdirectory(includes/stb_image)
 
 include_directories(includes)
+
+enable_testing()
+add_subdirectory(extern/googletest)
 
 # Compile options
 add_link_options(
@@ -79,11 +85,9 @@ add_compile_options(
 	-Wno-missing-braces
 )
 
-enable_testing()
-add_subdirectory(extern/googletest)
-
 # Add source 
 add_subdirectory(src/application)
 add_subdirectory(src/ecs)
 add_subdirectory(src/rendering)
 add_subdirectory(src/geodecy)
+add_subdirectory(src/wms)

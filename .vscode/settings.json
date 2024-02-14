@@ -3,6 +3,8 @@
 	"cmake.buildDirectory": "${workspaceFolder}/build/build",
 	"cmake.automaticReconfigure": false,
 	"cmake.configureOnEdit": true,
+	"editor.detectIndentation": false,
+	"editor.insertSpaces": false,
 	"files.associations": {
 		"iostream": "cpp",
 		"thread": "cpp",

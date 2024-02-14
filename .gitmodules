@@ -7,3 +7,6 @@
 [submodule "extern/imgui"]
 	path = extern/imgui
 	url = git@github.com:ocornut/imgui.git
+[submodule "extern/pugixml"]
+	path = extern/pugixml
+	url = git@github.com:zeux/pugixml.git

@@ -8,159 +8,12 @@
 
 #include <cmath>
 
-namespace geodecy::wgs84
+namespace geodecy
 {
 
 constexpr const double c_PI = 3.14159265358979323846264338327950288;
-
-constexpr const double c_A = 6378137.0;
-constexpr const double c_B = 6356752.314245;
-constexpr const double c_E = 0.081819190842622;
-
 constexpr const double c_deg2rad = c_PI / 180.0;
 constexpr const double c_rad2deg = 180.0 / c_PI;
-
-constexpr glm::dvec3 lla2ecef_rad(
-	double a_latitude_rad,
-	double a_longitude_rad,
-	double a_altitude_meter
-)
-{
-	const double c_lat = std::cos(a_latitude_rad);
-	const double s_lat = std::sin(a_latitude_rad);
-	const double c_lon = std::cos(a_longitude_rad);
-	const double s_lon = std::sin(a_longitude_rad);
-	const double N = c_A / std::sqrt(1 - c_E * c_E * s_lat * s_lat);
-	const double x = (N + a_altitude_meter) * c_lat * c_lon;
-	const double y = (N + a_altitude_meter) * c_lat * s_lon;
-	const double z = ((1 - c_E * c_E) * N + a_altitude_meter) * s_lat;
-	return {x, y, z};
-}
-
-constexpr glm::dvec3 lla2ecef_deg(
-	double a_latitude_deg,
-	double a_longitude_deg,
-	double a_altitude_meter
-)
-{
-	return lla2ecef_rad(
-		a_latitude_deg * c_deg2rad,
-		a_longitude_deg * c_deg2rad,
-		a_altitude_meter
-	);
-}
-
-// TODO: Use olson1998 (ch) instead
-constexpr glm::dvec3 ecef2lla_rad(const glm::dvec3& a_ecef)
-{
-	const double x = a_ecef.x;
-	const double y = a_ecef.y;
-	const double z = a_ecef.z;
-
-	const double rp = std::sqrt(x*x + y*y + z*z);
-
-	double flon_rad = (std::abs(x) + std::abs(y) < 1.0e-10)
-		? 0.0
-		: std::atan2(y, x);
-
-	const double p = std::sqrt(x*x + y*y);
-
-	// on pole special case
-	if(p < 1.0e-10)
-	{
-		double flat_rad  = (z < 0.0 ? -90 : 90.0) * c_deg2rad;
-		double alt_meter = rp - c_B;
-		return {
-			flat_rad,
-			flon_rad,
-			alt_meter
-		};
-	}
-
-	const double flatgc_rad = std::asin(z / rp);
-	const double slat_0 = std::sin(flatgc_rad);
-	const double aaa_rn = c_A / std::sqrt(1.0 - c_E * c_E * slat_0 * slat_0);
-
-	constexpr const double c_Value = (1.0 - c_E * c_E) * (1.0 - c_E * c_E) - 1;
-
-	// first iteration, use flatgc to get altitude
-	// and alt needed to convert gc to gd lat
-	double alt_meter = rp - aaa_rn * std::sqrt(1 + c_Value * slat_0 * slat_0);
-	double flat_rad;
-	{
-		// approximation by stages 1st use gc-lat as if is gd, then correct alt dependence
-		const double flatgd_rad = std::atan(std::tan(flatgc_rad) / (1 - c_E * c_E * aaa_rn / (aaa_rn + alt_meter)));
-
-		// now use this approximation for gd-lat to get rn etc
-		const double slat_1 = std::sin(flatgd_rad);
-		const double rn = c_A / std::sqrt(1.0 - c_E * c_E * slat_1 * slat_1);
-		flat_rad = std::atan(std::tan(flatgc_rad) / (1 - c_E * c_E * rn / (rn + alt_meter)));
-	}
-
-	double slat = std::sin(flat_rad);
-	double rn   = c_A / std::sqrt(1.0 - c_E * c_E * slat * slat);
-
-	for(int i = 0; i < 5; i++)
-	{
-		double tangd = (z + rn * c_E * c_E * slat) / p;
-		double flatn_rad = std::atan(tangd);
-
-		slat      = std::sin(flatn_rad);
-		rn        = c_A / std::sqrt(1.0 - c_E * c_E * slat * slat);
-		alt_meter = (p / std::cos(flatn_rad)) - rn;
-
-		double dlat_rad = flatn_rad - flat_rad;
-		flat_rad = flatn_rad;
-		if(std::abs(dlat_rad) < 1.0e-14)
-		{
-			break;
-		}
-	}
-
-	return {
-		flat_rad,
-		flon_rad,
-		alt_meter
-	};
-}
-
-constexpr glm::dvec3 ecef2lla_deg(const glm::dvec3& a_ecef)
-{
-	auto lla_rad = ecef2lla_rad(a_ecef);
-	return {
-		lla_rad.x * c_rad2deg,
-		lla_rad.y * c_rad2deg,
-		lla_rad.z // altitude
-	};
-}
-
-// Calculate the viewing direction
-// I call this the North West Up
-constexpr glm::dmat3 lla2nwu_rad(
-	double a_latitude_rad,
-	double a_longitude_rad)
-{
-	const double c_lat = std::cos(a_latitude_rad);
-	const double s_lat = std::sin(a_latitude_rad);
-	const double c_lon = std::cos(a_longitude_rad);
-	const double s_lon = std::sin(a_longitude_rad);
-
-	return glm::dmat3(
-		-s_lat * c_lon, -s_lat * s_lon, c_lat,
-		 s_lon        , -c_lon        , 0.0,
-		 c_lat * c_lon,  c_lat * s_lon, s_lat
-	);
-}
-
-constexpr glm::dmat3 lla2nwu_deg(
-	double a_latitude_deg,
-	double a_longitude_deg)
-{
-	return lla2nwu_rad(
-		a_latitude_deg * c_deg2rad,
-		a_longitude_deg * c_deg2rad
-	);
-}
 
 glm::dmat3 rpy_rad(
 	double a_roll_rad,
@@ -189,50 +42,50 @@ glm::dmat3 rpy(
 } // geodecy::wgs84
 
 
-
 // TODO: Use this in the future?
 #include "spheroid.hpp"
 namespace geodecy {
 
-using wgs84_test = spheroid<double, 6378137.0, 6356752.314245, glm::dvec3, glm::dmat3x3>;
-
-template <>
-constexpr double wgs84_test::get_x(const glm::dvec3& a_xyz)
+struct wgs84_glm_allocator
 {
-	return a_xyz.x;
-}
+	using Type = double;
+	using Vec3 = glm::dvec3;
+	using Mat3 = glm::dmat3;
 
-template <>
-constexpr double wgs84_test::get_y(const glm::dvec3& a_xyz)
-{
-	return a_xyz.y;
-}
+	static constexpr Mat3 to_mat(
+		double a_x0, double a_y0, double a_z0,
+		double a_x1, double a_y1, double a_z1,
+		double a_x2, double a_y2, double a_z2)
+	{
+		return Mat3(
+			a_x0, a_y0, a_z0,
+			a_x1, a_y1, a_z1,
+			a_x2, a_y2, a_z2);
+	}
 
-template <>
-constexpr double wgs84_test::get_z(const glm::dvec3& a_xyz)
-{
-	return a_xyz.z;
-}
+	static constexpr Vec3 to_vec(
+		double a_x, double a_y, double a_z)
+	{
+		return Vec3(a_x, a_y, a_z);	
+	}
 
-template <>
-constexpr glm::dvec3 wgs84_test::to_vec(
-	Type a_x, Type a_y, Type a_z)
-{
-	return glm::dvec3(a_x, a_y, a_z);
-}
+	static constexpr Type get_x(const Vec3& a_vec)
+	{
+		return a_vec.x;
+	}
 
-template <>
-constexpr glm::dmat3 wgs84_test::to_mat(
-	Type a_x0, Type a_y0, Type a_z0,
-	Type a_x1, Type a_y1, Type a_z1,
-	Type a_x2, Type a_y2, Type a_z2)
-{
-	return glm::dmat3(
-		a_x0, a_y0, a_z0,
-		a_x1, a_y1, a_z1,
-		a_x2, a_y2, a_z2);
-}
+	static constexpr Type get_y(const Vec3& a_vec)
+	{
+		return a_vec.y;
+	}
 
+	static constexpr Type get_z(const Vec3& a_vec)
+	{
+		return a_vec.z;
+	}
+};
+
+using wgs84 = spheroid<wgs84_glm_allocator, 6378137.0, 6356752.314245>;
 
 } // geodecy
 

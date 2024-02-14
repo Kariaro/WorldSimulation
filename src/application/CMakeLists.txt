@@ -9,8 +9,9 @@ target_include_directories(simulation
     PUBLIC public_include
 	)
 target_link_libraries(simulation
+	PUBLIC glfw3
 	PUBLIC ecs
 	PUBLIC glm
 	PUBLIC rendering
-	PUBLIC opengl32
+	PUBLIC wms_client
 	)
