@@ -104,7 +104,7 @@ const RequestType* WMSCapabilities::getRequestType(
 {
 	for(auto& item : requestTypes)
 	{
-		if(item.type == a_type && (a_name != nullptr && (item.name == a_name)))
+		if(item.type == a_type && (a_name == nullptr || (item.name == a_name)))
 		{
 			return &item;
 		}

@@ -15,6 +15,8 @@
 #include "wgs84.hpp"
 #include "geometry.h"
 
+#include <fstream>
+
 #include "plane.h"
 
 #include "wms_client.hpp"
@@ -352,12 +354,22 @@ void WorldRenderer::run()
 		wms::WMSClient wmsClient;
 
 		std::cout << "======================================" <<  std::endl;
+		//const wms::WMSCapabilities* capabilities = wmsClient.openCapabilities(
+		//	"https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi");
+		//const wms::WMSCapabilities* capabilities = wmsClient.openCapabilities(
+		//	"https://ows.terrestris.de/osm/service");
 		const wms::WMSCapabilities* capabilities = wmsClient.openCapabilities(
-			"https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0");
+			"https://ahocevar.com/geoserver/wms");
 		(void) capabilities;
 
-		std::vector<unsigned char> buffer = wmsClient.getImage(capabilities, "BlueMarble_NextGeneration", -90, 90, -180, 180, 4096, 2048);
+		// std::vector<unsigned char> buffer = wmsClient.getImage(capabilities, "BlueMarble_NextGeneration", -90, 90, -180, 180, 4096, 2048);
+		std::vector<unsigned char> buffer = wmsClient.getImage(capabilities, "ne:NE1_HR_LC_SR_W_DR", -90, 90, -180, 180, 1024, 512);
+		// std::vector<unsigned char> buffer = wmsClient.getImage(capabilities, "OSM-WMS", -85, 85, -180, 180, 4096, 2048);
 		frameData.earthTextureId = image::loadImageFromBuffer(buffer.data(), buffer.size());
+
+		std::ofstream myfile("assets/download.png");
+		myfile.write((char*) buffer.data(), buffer.size());
+		myfile.close();
 	}
 
 	glUseProgram(frameData.quadsphere.shaderProgramId);

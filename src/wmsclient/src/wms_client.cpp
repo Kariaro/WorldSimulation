@@ -51,23 +51,30 @@ httplib::Result requestData(const std::string& a_url)
 	// std::cout << a_url << std::endl;
 
 	httplib::Client client(url);
+	client.set_follow_location(true);
+	client.set_read_timeout(std::chrono::milliseconds(10'000));
 	auto res = client.Get(requestString, {{ "User-Agent", "harucoded-world-simulation/0.0.0" }});
 	client.stop();
 
 	return res;
 }
 
-const WMSCapabilities* WMSClient::openCapabilities(const std::string& a_url)
+const WMSCapabilities* WMSClient::openCapabilities(const std::string& a_url, const std::string& a_version)
 {
-	auto res = requestData(a_url);
+	std::string version = a_version.empty() ? "" : ("&VERSION=" + a_version);
 
-	// std::cout << "From URL [" << a_url << "]" << std::endl;
-	// std::cout << "Status: [" << response->status << "]" << std::endl;
+	// Try find version
+	std::string url = a_url + "?SERVICE=WMS&REQUEST=GetCapabilities" + version;
+	auto res = requestData(url);
+
+	// std::cout << "From URL [" << url << "]" << std::endl;
+	// std::cout << "Status: [" << res->status << "]" << std::endl;
 	// std::cout << "Headers:" << std::endl;
-	// for(auto& [key, value] : response->headers)
+	// for(auto& [key, value] : res->headers)
 	// {
 	// 	std::cout << "  - [" << key << "] = [" << value << "]" << std::endl;
 	// }
+	// std::cout << "Body: [" << std::endl << res->body << std::endl << "]" << std::endl;
 
 	return m_capabilities.emplace_back(std::make_unique<WMSCapabilities>(res->body)).get();
 }
@@ -84,6 +91,7 @@ std::vector<unsigned char> WMSClient::getImage(const WMSCapabilities* a_capabili
 	const RequestType* requestType = a_capabilities->getRequestType(RequestType::Type::GetMap);
 	if(requestType == nullptr)
 	{
+		std::cout << "Could not find GetMap request type" << std::endl;
 		// Empty buffer
 		return {};
 	}
@@ -101,14 +109,14 @@ std::vector<unsigned char> WMSClient::getImage(const WMSCapabilities* a_capabili
 
 	if(format.empty())
 	{
+		std::cout << "Could not find supported format" << std::endl;
 		// No supported format
 		return {};
 	}
 
 	const std::string version = a_capabilities->version.to_string();
-	const std::string& url = requestType->get_endpoints.front();
-	auto res = requestData(
-		url +
+	const std::string url =
+		requestType->get_endpoints.front() +
 		"SERVICE=WMS"
 		"&REQUEST=GetMap"
 		"&VERSION=" + version +
@@ -122,8 +130,10 @@ std::vector<unsigned char> WMSClient::getImage(const WMSCapabilities* a_capabili
 		+ std::to_string(a_minLon) + ","
 		+ std::to_string(a_maxLat) + ","
 		+ std::to_string(a_maxLon) +
-		"&layers=" + a_layers
-	);
+		"&layers=" + a_layers;
+	auto res = requestData(url);
+
+	std::cout << url << std::endl;
 
 	std::vector<unsigned char> buffer;
 	buffer.reserve(res->body.size());

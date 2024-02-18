@@ -27,7 +27,7 @@ struct a_device {};
 struct b_device {};
 
 int main(int argc, char** argv) {
-	{
+	/*{
 		wms::WMSClient wmsClient;
 
 		std::cout << "======================================" <<  std::endl;
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
 			"assets/wms.terrestris.xml");
 		(void) test3;
 		std::cout << test3->to_string() << std::endl;
-	}
+	}*/
 
 	ecs::registry<
 		ecs::component<transform, 1000>

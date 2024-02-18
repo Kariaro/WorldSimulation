@@ -18,7 +18,9 @@ public:
 	~WMSClient() = default;
 
 	const WMSCapabilities* openCapabilitiesFromFile(const std::string& a_pathname);
-	const WMSCapabilities* openCapabilities(const std::string& a_url);
+	const WMSCapabilities* openCapabilities(
+		const std::string& a_url,
+		const std::string& a_version="");
 
 	std::vector<unsigned char> getImage(const WMSCapabilities* a_capabilities,
 		const std::string& a_layers,
