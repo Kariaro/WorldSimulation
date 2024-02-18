@@ -13,6 +13,8 @@
                 "${workspaceFolder}/extern/imgui",
                 "${workspaceFolder}/extern/imgui/backends",
                 "${workspaceFolder}/extern/pugixml/src",
+                "${workspaceFolder}/extern/cpp-httplib",
+                "${workspaceFolder}/extern/openssl/include"
             ],
             "defines": [
                 "_DEBUG",

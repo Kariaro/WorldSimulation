@@ -23,17 +23,26 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_EXE_LINKER_FLAGS "-static -static-libstdc++ -std=c++20")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 add_definitions(-DGLM_FORCE_SILENT_WARNINGS)
 
-# set(CMAKE_EXE_LINKER_FLAGS "-static -static-libstdc++ -std=c++20")
-
 # Find packages
 find_package(GLFW3 REQUIRED)
-message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
+message(STATUS "Found GLFW3 in '${GLFW3_INCLUDE_DIR}'")
 
-add_subdirectory(extern/gdal)
+# TODO: Figure out static lib in the future
+# set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
+if(OPENSSL_FOUND)
+	set(HTTPLIB_REQUIRE_OPENSSL ON)
+else()
+	message(WARNING "Could not find OpenSSL, will not be able to download map data from HTTPS")
+endif()
+set(HTTPLIB_COMPILE ON)
+set(HTTPLIB_NO_EXCEPTIONS ON)
+add_subdirectory(extern/cpp-httplib)
+
 
 # Link directory
 link_directories(lib)
@@ -65,7 +74,6 @@ add_subdirectory(extern/googletest)
 
 # Compile options
 add_link_options(
-#	-lopengl32
 	-static
 	-std=c++20
 )
@@ -90,4 +98,4 @@ add_subdirectory(src/application)
 add_subdirectory(src/ecs)
 add_subdirectory(src/rendering)
 add_subdirectory(src/geodecy)
-add_subdirectory(src/wms)
+add_subdirectory(src/wmsclient)

@@ -17,12 +17,13 @@
 
 #include "plane.h"
 
+#include "wms_client.hpp"
+
 
 // ImGui
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-
 
 using namespace geodecy;
 
@@ -346,6 +347,18 @@ void WorldRenderer::run()
 	frameData.earthDepthmapId = image::loadImage("assets/earth_depthmap_10k.jpg");
 	std::printf("Read texture %u\n", frameData.earthTextureId);
 	std::printf("Read texture %u\n", frameData.earthDepthmapId);
+	
+	{
+		wms::WMSClient wmsClient;
+
+		std::cout << "======================================" <<  std::endl;
+		const wms::WMSCapabilities* capabilities = wmsClient.openCapabilities(
+			"https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0");
+		(void) capabilities;
+
+		std::vector<unsigned char> buffer = wmsClient.getImage(capabilities, "BlueMarble_NextGeneration", -90, 90, -180, 180, 4096, 2048);
+		frameData.earthTextureId = image::loadImageFromBuffer(buffer.data(), buffer.size());
+	}
 
 	glUseProgram(frameData.quadsphere.shaderProgramId);
 	glUniform1i(glGetUniformLocation(frameData.quadsphere.shaderProgramId, "earthTexture"), 0);

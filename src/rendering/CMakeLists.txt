@@ -13,4 +13,5 @@ target_link_libraries(rendering
 	PUBLIC opengl32
 	PUBLIC geodecy
 	PUBLIC imgui
+	PUBLIC wms_client
 	)

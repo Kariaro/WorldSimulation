@@ -97,29 +97,49 @@ struct RequestType
 	/// The endpoint of the request
 	std::string name;
 
+	/// The type of this endpoint
+	enum class Type
+	{
+		GetCapabilities,
+		GetMap,
+		GetFeatureInfo,
+		_ExtendedOperation
+	} type;
+
 	/// The formats the endpoint supports
 	std::vector<std::string> formats;
 
 	/// Get endpoints
 	std::vector<std::string> get_endpoints;
 
+	bool supportsFormat(const std::string& a_format) const
+	{
+		// TODO: use std::find
+		for(auto& item : formats)
+		{
+			if(item == a_format)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/// @return a temporary to_string method
 	std::string to_string() const
 	{
 		std::stringstream ss;
-		ss << "<" << name << ">\n";
+		ss << "request: [" << name << "]\n";
 		for(auto& format : formats)
 		{
-			ss << "\t<Format>" << format << "</Format>\n";
+			ss << "  - format: [" << format << "]\n";
 		}
 
-		ss << "\t<Endpoints>\n";
 		for(auto& endpoint : get_endpoints)
 		{
-			ss << "\t\t<Get>" << endpoint << "</Get>\n";
+			ss << "  - (Get) endpoint: [" << endpoint << "]\n";
 		}
-		ss << "\t<Endpoints>\n";
-		
-		ss << "</" << name << ">";
+
 		return ss.str();
 	}
 };
@@ -133,41 +153,25 @@ struct WMSLayer
 	std::string title;
 };
 
-struct OperationType
-{
-	/// The name of this operation type
-	std::string name;
-
-	/// Allowed formates
-	std::vector<std::string> formats;
-
-	std::string to_string() const
-	{
-		std::stringstream ss;
-		ss << "<" << name << ">\n";
-		for(auto& format : formats)
-		{
-			ss << "\t<Format>" << format << "</Format>\n";
-		}
-		ss << "</" << name << ">";
-		return ss.str();
-	}
-};
-
-struct WMSCapabilitiesRequest
-{
-
-};
-
 struct WMSCapabilities
 {
 	/// The version of the wms capabilities
 	Version version;
 
+	/// Request types (GetCapabilities, GetMap, ...)
+	std::vector<RequestType> requestTypes;
+
 	/// Layers
 	std::vector<WMSLayer> layers;
 
+	WMSCapabilities() = default;
 	WMSCapabilities(const std::string& a_xml);
+
+	const RequestType* getRequestType(
+		const RequestType::Type& a_type,
+		const char* a_name = nullptr) const;
+
+	std::string to_string() const;
 };
 
 } // wms

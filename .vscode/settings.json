@@ -92,6 +92,12 @@
 		"variant": "cpp",
 		"csignal": "cpp",
 		"span": "cpp",
-		"string.h": "c"
+		"string.h": "c",
+		"codecvt": "cpp",
+		"csetjmp": "cpp",
+		"filesystem": "cpp",
+		"future": "cpp",
+		"ranges": "cpp",
+		"shared_mutex": "cpp"
 	}
 }

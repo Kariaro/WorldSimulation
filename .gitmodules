@@ -10,3 +10,6 @@
 [submodule "extern/pugixml"]
 	path = extern/pugixml
 	url = git@github.com:zeux/pugixml.git
+[submodule "extern/cpp-httplib"]
+	path = extern/cpp-httplib
+	url = git@github.com:yhirose/cpp-httplib.git
